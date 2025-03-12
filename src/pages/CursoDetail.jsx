@@ -1,11 +1,13 @@
-import React from "react";
-import { Container, Row, Col, Card, Image } from "react-bootstrap";
+import React, { useState } from "react";
+import { Container, Row, Col, Card, Image, Form, Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import { FaShareAlt } from "react-icons/fa";
 import Footer from "./Footer";
 import NavBarHome from "./NavbarHome";
 import Cursos from "./Cursos";
 
 const CourseDetail = () => {
+  const [searchTerm, setSearchTerm] = useState("");
 
   const items = [
     {
@@ -14,12 +16,12 @@ const CourseDetail = () => {
       text: "… Assim sendo, o documento final do Projeto de TCC deverá conter a … TCC de modo que o mesmo seja plenamente escrito e implementado na disciplina TCC em Sistemas de Informação",
       author: "LUCIANA DO AMARAL TEIXEIRA",
       date: "Publicado em: 04/09/2023",
-      link: "https://biblioteca-tcc-pds.s3.us-east-2.amazonaws.com/10+Livro+Projeto+de+TCC+(1).pdf" 
+      link: "https://biblioteca-tcc-pds.s3.us-east-2.amazonaws.com/1741814659397_Data+Firewalls.pdf" 
     },
     {
       id: 2,
       title: "Modelo de Grãos",
-      text: "Treinamneto de IA.",
+      text: "Treinamento de IA.",
       author: "Autor",
       date: "Publicado em: 05/09/2023",
       link: "https://biblioteca-tcc-pds.s3.us-east-2.amazonaws.com/1741219901067_modelo-gr%C3%83%C2%A3os.pdf"
@@ -50,34 +52,71 @@ const CourseDetail = () => {
     },
   ];
 
+  const filteredItems = items.filter((item) =>
+    item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.text.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleShare = async (link) => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Compartilhar PDF',
+          text: 'Confira este PDF:',
+          url: link,
+        });
+      } catch (error) {
+        console.error("Erro ao compartilhar:", error);
+      }
+    } else {
+      navigator.clipboard.writeText(link);
+      alert("Link copiado para a área de transferência!");
+    }
+  };
+
   return (
     <div className="d-flex flex-column min-vh-100">
-      <NavBarHome/>
+      <NavBarHome />
       <Container className="my-4 flex-grow-1">
         <h3 className="mb-4">{Cursos.nome}</h3>
-        
-        {items.map((item) => (
+
+        <Form.Group className="mb-4">
+          <Form.Control
+            type="text"
+            placeholder="Pesquisar..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </Form.Group>
+
+        {filteredItems.map((item) => (
           <Card key={item.id} className="mb-3">
             <Card.Body>
               <Row>
-                {/* Imagem do item */}
                 <Col xs={2} md={1}>
                   <Image
-                    src="src\pages\images\imagem-list.png" // Ajuste para o seu caminho
+                    src="src/pages/images/imagem-list.png"
                     alt="Item"
                     rounded
                   />
                 </Col>
-
-                {/* Conteúdo do item */}
                 <Col xs={10} md={11}>
-                  {/* Título com link */}
-                  <Link to={item.link} className="text-decoration-none">
-                    <Card.Title className="text-success">{item.title}</Card.Title>
-                  </Link>
-                  <Card.Text className="text-muted">{item.text}</Card.Text>
+                  <div className="d-flex justify-content-between align-items-center">
+                    <Link to={item.link} className="text-decoration-none">
+                      <Card.Title className="text-success">
+                        {item.title}
+                      </Card.Title>
+                    </Link>
+                    <Button variant="link" onClick={() => handleShare(item.link)}>
+                      <FaShareAlt size={20} />
+                    </Button>
+                  </div>
+                  <Card.Text className="text-muted">
+                    {item.text}
+                  </Card.Text>
                   <div className="text-muted">
-                    <small>{item.author}</small><br />
+                    <small>{item.author}</small>
+                    <br />
                     <small>{item.date}</small>
                   </div>
                 </Col>
@@ -85,9 +124,7 @@ const CourseDetail = () => {
             </Card.Body>
           </Card>
         ))}
-
       </Container>
-
       <Footer />
     </div>
   );

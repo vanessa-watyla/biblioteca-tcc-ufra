@@ -35,7 +35,10 @@ const FileUpload = () => {
       const response = await axios.post('http://localhost:3000/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      setUploadedUrl(response.data.url);
+
+      // Adiciona o parâmetro para forçar exibição inline do PDF
+      const inlineUrl = response.data.url + '?response-content-disposition=inline';
+      setUploadedUrl(inlineUrl);
 
       // Exibe o Toast de sucesso
       setShowToast(true);
@@ -54,10 +57,10 @@ const FileUpload = () => {
 
   return (
     <>
-    <NavBarHome />
+      <NavBarHome />
       <div style={backgroundStyle}>
         <Container>
-          {/* ToastContainer no canto superior direito (pode alterar a posição se quiser) */}
+          {/* ToastContainer no canto superior direito */}
           <ToastContainer position="top-end" className="p-3">
             <Toast
               onClose={() => setShowToast(false)}
@@ -163,7 +166,6 @@ const FileUpload = () => {
             </Col>
           </Row>
         </Container>
-        
       </div>
       <Footer/>
     </>

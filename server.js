@@ -1,4 +1,4 @@
-require('dotenv').config(); // Carrega as variáveis do .env
+require('dotenv').config(); 
 
 const express = require("express");
 const { S3Client } = require("@aws-sdk/client-s3");
@@ -7,27 +7,31 @@ const multerS3 = require("multer-s3-v3");
 const app = express();
 
 const s3Client = new S3Client({
-  region: "us-east-2", // Use a região correta do seu bucket
+  region: "us-east-2", 
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   }
 });
 
-// Definindo acl como undefined para não enviar esse header
 const upload = multer({
   storage: multerS3({
     s3: s3Client,
     bucket: "biblioteca-tcc-pds",
-    contentDisposition: 'inline',
-    metadata: function (req, file, cb) {
+    contentDisposition: 'inline', // Força exibição inline
+    // Força explicitamente o Content-Type para PDF
+    contentType: (req, file, cb) => {
+      cb(null, 'application/pdf');
+    },
+    metadata: (req, file, cb) => {
       cb(null, { fieldName: file.fieldname });
     },
-    key: function (req, file, cb) {
+    key: (req, file, cb) => {
       cb(null, Date.now().toString() + "_" + file.originalname);
     }
   })
 });
+
 
 app.post("/upload", (req, res) => {
   upload.single("pdfFile")(req, res, function(err) {
